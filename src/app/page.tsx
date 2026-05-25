@@ -14,9 +14,12 @@ interface Player {
   currentTeam: { id: string; name: string; shortName: string | null; logoUrl: string | null } | null;
 }
 
+const PAGE_SIZE = 12;
+
 export default function HomePage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [query, setQuery] = useState("");
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     fetch("/api/players/search?q=")
@@ -27,7 +30,11 @@ export default function HomePage() {
   const handleResults = useCallback((results: Player[], q: string) => {
     setPlayers(results);
     setQuery(q);
+    setShowAll(false);
   }, []);
+
+  const visiblePlayers = showAll ? players : players.slice(0, PAGE_SIZE);
+  const hasMore = players.length > PAGE_SIZE;
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-12">
@@ -45,11 +52,26 @@ export default function HomePage() {
       )}
 
       {players.length > 0 && (
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {players.map((p) => (
-            <PlayerCard key={p.id} {...p} />
-          ))}
-        </div>
+        <>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {visiblePlayers.map((p) => (
+              <PlayerCard key={p.id} {...p} />
+            ))}
+          </div>
+
+          {hasMore && (
+            <div className="mt-6 text-center">
+              <button
+                onClick={() => setShowAll((v) => !v)}
+                className="rounded-lg border border-[var(--border)] bg-[var(--card)] px-6 py-2 text-sm text-[var(--subtext)] hover:border-[var(--primary)] hover:text-[var(--text)] transition-colors"
+              >
+                {showAll
+                  ? `Show less`
+                  : `Show more (${players.length - PAGE_SIZE} more)`}
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       <p className="mt-8 text-center text-sm text-[var(--subtext)]">
