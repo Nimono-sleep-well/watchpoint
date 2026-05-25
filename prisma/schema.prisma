@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  TANK
+  DPS
+  SUPPORT
+  FLEX
+}
+
+model Player {
+  id            String       @id @default(cuid())
+  liquipediaId  String       @unique
+  handle        String
+  realName      String?
+  country       String?
+  birthDate     DateTime?
+  role          Role?
+  liquipediaUrl String?
+
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  rosters       TeamRoster[]
+  transfers     Transfer[]
+
+  @@index([handle])
+}
+
+model Team {
+  id            String       @id @default(cuid())
+  liquipediaId  String       @unique
+  name          String
+  shortName     String?
+  region        String?
+  liquipediaUrl String?
+
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  rosters       TeamRoster[]
+  transfersFrom Transfer[]   @relation("fromTeam")
+  transfersTo   Transfer[]   @relation("toTeam")
+}
+
+model TeamRoster {
+  id         String    @id @default(cuid())
+  playerId   String
+  teamId     String
+  joinDate   DateTime?
+  leaveDate  DateTime?
+  isActive   Boolean   @default(false)
+
+  player     Player    @relation(fields: [playerId], references: [id])
+  team       Team      @relation(fields: [teamId], references: [id])
+
+  @@index([playerId])
+  @@index([teamId])
+}
+
+model Transfer {
+  id           String    @id @default(cuid())
+  playerId     String
+  fromTeamId   String?
+  toTeamId     String?
+  date         DateTime
+  note         String?
+
+  player       Player    @relation(fields: [playerId], references: [id])
+  fromTeam     Team?     @relation("fromTeam", fields: [fromTeamId], references: [id])
+  toTeam       Team?     @relation("toTeam", fields: [toTeamId], references: [id])
+
+  @@index([playerId])
+}

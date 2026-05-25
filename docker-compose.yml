@@ -1,0 +1,26 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: watchpoint
+      POSTGRES_PASSWORD: watchpoint
+      POSTGRES_DB: watchpoint
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://watchpoint:watchpoint@db:5432/watchpoint
+      LIQUIPEDIA_API_KEY: ${LIQUIPEDIA_API_KEY}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+    depends_on:
+      - db
+    command: sh -c "npx prisma migrate deploy && npm start"
+
+volumes:
+  db_data:
