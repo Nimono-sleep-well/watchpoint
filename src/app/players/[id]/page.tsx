@@ -22,12 +22,12 @@ export default async function PlayerPage({ params }: PageProps) {
 
   return (
     <main>
-      <nav className="border-b border-[#2a2d3a] px-4 py-3">
+      <nav className="border-b border-[var(--border)] px-4 py-3">
         <div className="mx-auto flex max-w-[760px] items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-sm text-[#6b7280] hover:text-[#e5e7eb] transition-colors">
+          <Link href="/" className="flex items-center gap-2 text-sm text-[var(--subtext)] hover:text-[var(--text)] transition-colors">
             ← Back
           </Link>
-          <span className="font-bold text-[#f99e1a]">Watchpoint</span>
+          <span className="font-bold text-[var(--primary)]">Watchpoint</span>
         </div>
       </nav>
       <PlayerProfile {...player} />

@@ -5,18 +5,16 @@ export async function GET(request: NextRequest) {
   const q = request.nextUrl.searchParams.get("q") ?? "";
   const limit = Math.min(Number(request.nextUrl.searchParams.get("limit") ?? "20"), 50);
 
-  if (!q.trim()) {
-    return NextResponse.json({ players: [], total: 0 });
-  }
+  const where = q.trim()
+    ? { handle: { contains: q, mode: "insensitive" as const } }
+    : undefined;
 
   const players = await prisma.player.findMany({
-    where: {
-      handle: { contains: q, mode: "insensitive" },
-    },
+    where,
     include: {
       rosters: {
         where: { isActive: true },
-        include: { team: { select: { id: true, name: true, shortName: true } } },
+        include: { team: { select: { id: true, name: true, shortName: true, logoUrl: true } } },
         take: 1,
       },
     },
@@ -24,9 +22,7 @@ export async function GET(request: NextRequest) {
     take: limit,
   });
 
-  const total = await prisma.player.count({
-    where: { handle: { contains: q, mode: "insensitive" } },
-  });
+  const total = await prisma.player.count({ where });
 
   const result = players.map((p) => ({
     id: p.id,
@@ -34,6 +30,7 @@ export async function GET(request: NextRequest) {
     realName: p.realName,
     country: p.country,
     role: p.role,
+    photoUrl: p.photoUrl,
     currentTeam: p.rosters[0]?.team ?? null,
   }));
 

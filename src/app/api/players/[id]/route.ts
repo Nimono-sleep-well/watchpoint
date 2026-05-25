@@ -11,7 +11,7 @@ export async function GET(
     where: { id },
     include: {
       rosters: {
-        include: { team: { select: { id: true, name: true, shortName: true } } },
+        include: { team: { select: { id: true, name: true, shortName: true, logoUrl: true } } },
         orderBy: { joinDate: "desc" },
       },
       transfers: {
@@ -37,6 +37,7 @@ export async function GET(
     country: player.country,
     birthDate: player.birthDate?.toISOString().split("T")[0] ?? null,
     role: player.role,
+    photoUrl: player.photoUrl,
     liquipediaUrl: player.liquipediaUrl,
     currentTeam,
     rosters: player.rosters.map((r) => ({

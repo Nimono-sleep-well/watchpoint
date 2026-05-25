@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Image from "next/image";
 
 const ROLE_COLORS: Record<string, string> = {
   TANK: "#4e9aff",
@@ -21,6 +21,7 @@ interface Team {
   id: string;
   name: string;
   shortName?: string | null;
+  logoUrl?: string | null;
 }
 
 interface Roster {
@@ -44,6 +45,7 @@ interface PlayerProfileProps {
   country: string | null;
   birthDate: string | null;
   role: string | null;
+  photoUrl: string | null;
   liquipediaUrl: string | null;
   currentTeam: Team | null;
   rosters: Roster[];
@@ -62,6 +64,7 @@ export function PlayerProfile({
   country,
   birthDate,
   role,
+  photoUrl,
   liquipediaUrl,
   currentTeam,
   rosters,
@@ -69,42 +72,72 @@ export function PlayerProfile({
 }: PlayerProfileProps) {
   return (
     <div className="mx-auto max-w-[760px] space-y-6 px-4 py-8">
-      <div className="rounded-lg border border-[#2a2d3a] bg-[#1a1d27] p-6">
-        <div className="flex flex-wrap items-center gap-3">
-          {country && (
-            <span className="text-3xl" title={country}>{countryToFlag(country)}</span>
-          )}
-          <h1 className="text-3xl font-bold text-[#e5e7eb]">{handle}</h1>
-          {role && (
-            <span
-              className="rounded px-3 py-1 text-sm font-semibold"
-              style={{ color: ROLE_COLORS[role] ?? "#e5e7eb", background: `${ROLE_COLORS[role] ?? "#e5e7eb"}22` }}
-            >
-              {role}
-            </span>
-          )}
+      {/* ヘッダー */}
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-6">
+        <div className="flex gap-5">
+          {/* 顔写真 */}
+          <div className="shrink-0 h-24 w-24 rounded-lg overflow-hidden bg-[var(--border)]">
+            {photoUrl ? (
+              <Image src={photoUrl} alt={handle} width={96} height={96} className="h-full w-full object-cover object-top" unoptimized />
+            ) : (
+              <div className="h-full w-full flex items-center justify-center text-4xl font-bold text-[var(--subtext)]">
+                {handle[0].toUpperCase()}
+              </div>
+            )}
+          </div>
+
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              {country && (
+                <span className="text-2xl" title={country}>{countryToFlag(country)}</span>
+              )}
+              <h1 className="text-3xl font-bold text-[var(--text)]">{handle}</h1>
+              {role && (
+                <span
+                  className="rounded px-3 py-1 text-sm font-semibold"
+                  style={{ color: ROLE_COLORS[role] ?? "#e5e7eb", background: `${ROLE_COLORS[role] ?? "#e5e7eb"}22` }}
+                >
+                  {role}
+                </span>
+              )}
+            </div>
+            {realName && <p className="mt-1 text-lg text-[var(--subtext)]">{realName}</p>}
+            {birthDate && (
+              <p className="mt-1 text-sm text-[var(--subtext)]">Born: {birthDate}</p>
+            )}
+          </div>
         </div>
-        {realName && <p className="mt-1 text-lg text-[#6b7280]">{realName}</p>}
-        {birthDate && (
-          <p className="mt-1 text-sm text-[#6b7280]">Born: {birthDate}</p>
-        )}
       </div>
 
+      {/* 現所属チーム */}
       <section>
-        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-[#6b7280]">Current Team</h2>
-        <div className="rounded-lg border border-[#2a2d3a] bg-[#1a1d27] px-4 py-3 text-[#e5e7eb]">
-          {currentTeam?.name ?? "Free Agent"}
+        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-[var(--subtext)]">Current Team</h2>
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 py-3">
+          {currentTeam ? (
+            <div className="flex items-center gap-3">
+              {currentTeam.logoUrl && (
+                <Image src={currentTeam.logoUrl} alt={currentTeam.name} width={32} height={32} className="h-8 w-8 object-contain" unoptimized />
+              )}
+              <span className="text-[var(--text)] font-medium">{currentTeam.name}</span>
+            </div>
+          ) : (
+            <span className="text-[var(--subtext)]">Free Agent</span>
+          )}
         </div>
       </section>
 
+      {/* キャリア履歴 */}
       {rosters.length > 0 && (
         <section>
-          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-[#6b7280]">Career History</h2>
-          <div className="rounded-lg border border-[#2a2d3a] bg-[#1a1d27] divide-y divide-[#2a2d3a]">
+          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-[var(--subtext)]">Career History</h2>
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] divide-y divide-[var(--border)]">
             {rosters.map((r, i) => (
-              <div key={i} className="flex items-center justify-between px-4 py-3 text-sm">
-                <span className="font-medium text-[#e5e7eb]">{r.team.name}</span>
-                <span className="text-[#6b7280]">
+              <div key={i} className="flex items-center gap-3 px-4 py-3 text-sm">
+                {r.team.logoUrl && (
+                  <Image src={r.team.logoUrl} alt={r.team.name} width={20} height={20} className="h-5 w-5 object-contain shrink-0" unoptimized />
+                )}
+                <span className="font-medium text-[var(--text)] flex-1">{r.team.name}</span>
+                <span className="text-[var(--subtext)] shrink-0">
                   {formatDate(r.joinDate)} – {r.isActive ? "Present" : formatDate(r.leaveDate)}
                 </span>
               </div>
@@ -113,17 +146,18 @@ export function PlayerProfile({
         </section>
       )}
 
+      {/* 移籍履歴 */}
       {transfers.length > 0 && (
         <section>
-          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-[#6b7280]">Transfer History</h2>
-          <div className="rounded-lg border border-[#2a2d3a] bg-[#1a1d27] divide-y divide-[#2a2d3a]">
+          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-[var(--subtext)]">Transfer History</h2>
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] divide-y divide-[var(--border)]">
             {transfers.map((t, i) => (
               <div key={i} className="flex items-center gap-4 px-4 py-3 text-sm">
-                <span className="shrink-0 text-[#6b7280]">{t.date}</span>
-                <span className="text-[#e5e7eb]">
+                <span className="shrink-0 text-[var(--subtext)]">{t.date}</span>
+                <span className="text-[var(--text)]">
                   {t.fromTeam?.name ?? "Free Agent"} → {t.toTeam?.name ?? "Free Agent"}
                 </span>
-                {t.note && <span className="ml-auto shrink-0 text-xs text-[#6b7280]">{t.note}</span>}
+                {t.note && <span className="ml-auto shrink-0 text-xs text-[var(--subtext)]">{t.note}</span>}
               </div>
             ))}
           </div>
@@ -135,7 +169,7 @@ export function PlayerProfile({
           href={liquipediaUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-[#f99e1a] hover:underline text-sm"
+          className="inline-flex items-center gap-2 text-[var(--primary)] hover:underline text-sm"
         >
           🔗 View on Liquipedia
         </a>

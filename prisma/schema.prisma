@@ -15,6 +15,7 @@ model Player {
   country       String?
   birthDate     DateTime?
   role          Role?
+  photoUrl      String?
   liquipediaUrl String?
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
@@ -30,6 +31,7 @@ model Team {
   name          String
   shortName     String?
   region        String?
+  logoUrl       String?
   liquipediaUrl String?
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { SearchBar } from "@/components/SearchBar";
 import { PlayerCard } from "@/components/PlayerCard";
 
@@ -10,12 +10,19 @@ interface Player {
   realName: string | null;
   country: string | null;
   role: string | null;
-  currentTeam: { id: string; name: string; shortName: string | null } | null;
+  photoUrl: string | null;
+  currentTeam: { id: string; name: string; shortName: string | null; logoUrl: string | null } | null;
 }
 
 export default function HomePage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    fetch("/api/players/search?q=")
+      .then((r) => r.json())
+      .then((data) => setPlayers(data.players));
+  }, []);
 
   const handleResults = useCallback((results: Player[], q: string) => {
     setPlayers(results);
@@ -25,14 +32,14 @@ export default function HomePage() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-12">
       <header className="mb-10 text-center">
-        <h1 className="text-4xl font-bold text-[#f99e1a]">Watchpoint</h1>
-        <p className="mt-2 text-[#6b7280]">Overwatch Pro Player Search</p>
+        <h1 className="text-4xl font-bold text-[var(--primary)]">Watchpoint</h1>
+        <p className="mt-2 text-[var(--subtext)]">Overwatch Pro Player Search</p>
       </header>
 
       <SearchBar onResults={handleResults} />
 
       {query && players.length === 0 && (
-        <p className="mt-8 text-center text-[#6b7280]">
+        <p className="mt-8 text-center text-[var(--subtext)]">
           No players found for &ldquo;{query}&rdquo;
         </p>
       )}
@@ -45,15 +52,13 @@ export default function HomePage() {
         </div>
       )}
 
-      {!query && (
-        <p className="mt-12 text-center text-sm text-[#6b7280]">
-          Data sourced from{" "}
-          <a href="https://liquipedia.net/overwatch" target="_blank" rel="noopener noreferrer" className="text-[#f99e1a] hover:underline">
-            Liquipedia
-          </a>{" "}
-          (CC-BY-SA 3.0)
-        </p>
-      )}
+      <p className="mt-8 text-center text-sm text-[var(--subtext)]">
+        Data sourced from{" "}
+        <a href="https://liquipedia.net/overwatch" target="_blank" rel="noopener noreferrer" className="text-[var(--primary)] hover:underline">
+          Liquipedia
+        </a>{" "}
+        (CC-BY-SA 3.0)
+      </p>
     </main>
   );
 }
