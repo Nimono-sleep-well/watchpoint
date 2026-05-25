@@ -6,7 +6,12 @@ export async function GET(request: NextRequest) {
   const limit = Math.min(Number(request.nextUrl.searchParams.get("limit") ?? "20"), 50);
 
   const where = q.trim()
-    ? { handle: { contains: q, mode: "insensitive" as const } }
+    ? {
+        OR: [
+          { handle: { contains: q, mode: "insensitive" as const } },
+          { rosters: { some: { isActive: true, team: { name: { contains: q, mode: "insensitive" as const } } } } },
+        ],
+      }
     : undefined;
 
   const players = await prisma.player.findMany({
